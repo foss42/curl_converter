@@ -27,6 +27,16 @@ void main() {
     );
   }, timeout: defaultTimeout);
 
+  test('Check quotes support for URL string', () async {
+    expect(
+      Curl.parse('curl -X GET "https://www.example.com/"'),
+      Curl(
+        method: 'GET',
+        uri: exampleDotComUri,
+      ),
+    );
+  }, timeout: defaultTimeout);
+
   test('parses two headers', () async {
     expect(
       Curl.parse(

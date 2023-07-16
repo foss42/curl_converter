@@ -1,6 +1,8 @@
 import 'package:args/args.dart';
 import 'package:equatable/equatable.dart';
 
+final _splitSymbolsRegExp = RegExp(r'\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)');
+
 /// A representation of a cURL command in Dart.
 ///
 /// The Curl class provides methods for parsing a cURL command string
@@ -99,7 +101,7 @@ class Curl extends Equatable {
       throw Exception("curlString doesn't start with 'curl '");
     }
     final result = parser.parse(
-      curlString.replaceFirst('curl ', '').split(RegExp(r'\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)')),
+      curlString.replaceFirst('curl ', '').split(_splitSymbolsRegExp),
     );
 
     final method = (result['request'] as String?)?.toUpperCase();
@@ -127,7 +129,7 @@ class Curl extends Equatable {
     final bool location = result['location'] ?? false;
 
     // Extract the request URL
-    final url = result.rest.isNotEmpty ? result.rest.first : null;
+    final url = result.rest.isNotEmpty ? result.rest.first.replaceAll('"', '') : null;
     if (url == null) {
       throw Exception('url is null');
     }

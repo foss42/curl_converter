@@ -1,7 +1,6 @@
 import 'package:args/args.dart';
+import 'package:curl_converter/utils/string.dart';
 import 'package:equatable/equatable.dart';
-
-final _splitSymbolsRegExp = RegExp(r'\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)');
 
 /// A representation of a cURL command in Dart.
 ///
@@ -42,7 +41,7 @@ class Curl extends Equatable {
   final bool location;
 
   /// Constructs a new Curl object with the specified parameters.
-  /// 
+  ///
   /// The uri parameter is required, while the remaining parameters are optional.
   Curl({
     required this.uri,
@@ -83,7 +82,7 @@ class Curl extends Equatable {
   /// print(Curl.tryParse('1f')); // [Exception] is thrown
   /// ```
   static Curl parse(String curlString) {
-    final parser = ArgParser(allowTrailingOptions: true);
+    final parser = ArgParser(allowTrailingOptions: false);
 
     // Define the expected options
     parser.addOption('request', abbr: 'X');
@@ -100,9 +99,10 @@ class Curl extends Equatable {
     if (!curlString.startsWith('curl ')) {
       throw Exception("curlString doesn't start with 'curl '");
     }
-    final result = parser.parse(
-      curlString.replaceFirst('curl ', '').split(_splitSymbolsRegExp),
-    );
+
+    final splittedCurlString = splitAsCommandLineArgs(curlString.replaceFirst('curl ', ''));
+
+    final result = parser.parse(splittedCurlString);
 
     final method = (result['request'] as String?)?.toUpperCase();
 
@@ -113,7 +113,7 @@ class Curl extends Equatable {
       if (headersList.isNotEmpty == true) {
         headers = <String, String>{};
         for (var headerString in headersList) {
-          final splittedHeaderString = headerString.replaceAll(RegExp(r'(?<!\\)\"'), '').split(RegExp(r':\s*'));
+          final splittedHeaderString = headerString.split(RegExp(r':\s*'));
           if (splittedHeaderString.length != 2) {
             throw Exception('Failed to split the `$headerString` header');
           }

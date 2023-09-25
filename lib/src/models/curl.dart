@@ -87,7 +87,7 @@ class Curl extends Equatable {
 
     // Define the expected options
     parser.addOption('request', abbr: 'X');
-    parser.addMultiOption('header', abbr: 'H');
+    parser.addMultiOption('header', abbr: 'H', splitCommas: false);
     parser.addOption('data', abbr: 'd');
     parser.addOption('cookie', abbr: 'b');
     parser.addOption('user', abbr: 'u');
@@ -113,7 +113,10 @@ class Curl extends Equatable {
       if (headersList.isNotEmpty == true) {
         headers = <String, String>{};
         for (var headerString in headersList) {
-          final splittedHeaderString = headerString.replaceAll('"', '').split(RegExp(r':\s*'));
+          final splittedHeaderString = headerString.replaceAll(RegExp(r'(?<!\\)\"'), '').split(RegExp(r':\s*'));
+          if (splittedHeaderString.length != 2) {
+            throw Exception('Failed to split the `$headerString` header');
+          }
           headers.addAll({splittedHeaderString[0]: splittedHeaderString[1]});
         }
       }

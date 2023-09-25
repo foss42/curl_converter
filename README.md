@@ -31,6 +31,14 @@ void main() {
 - Format a `Curl` object back into a cURL command.
 - Supports various options such as request method, headers, data, cookies, user-agent, and more.
 
+## Commands
+
+### Publish new version
+
+```
+$ dart pub publish --dry-run
+```
+
 ## Contributing
 
 Contributions are welcome! Please create an issue or make a fork and propose a PR to contribute to this project.

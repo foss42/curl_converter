@@ -89,4 +89,27 @@ void main() {
       throwsException,
     );
   }, timeout: defaultTimeout);
+
+  test('tryParse return null when parses wrong input', () async {
+    expect(
+      Curl.tryParse('1f'),
+      null,
+    );
+  }, timeout: defaultTimeout);
+
+  test('tryParse success', () async {
+    expect(
+      Curl.tryParse(
+        'curl -X GET https://www.example.com/ -H "${HttpHeaders.contentTypeHeader}: ${ContentType.text}" -H "${HttpHeaders.authorizationHeader}: Bearer %token%"',
+      ),
+      Curl(
+        method: 'GET',
+        uri: exampleDotComUri,
+        headers: {
+          HttpHeaders.contentTypeHeader: ContentType.text.toString(),
+          HttpHeaders.authorizationHeader: 'Bearer %token%',
+        },
+      ),
+    );
+  }, timeout: defaultTimeout);
 }

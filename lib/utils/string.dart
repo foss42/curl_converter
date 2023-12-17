@@ -5,7 +5,9 @@ List<String> splitAsCommandLineArgs(String input) {
 
   for (var i = 0; i < input.length; ++i) {
     if (input[i] == ' ' && !insideQuotes) {
-      splittedCurlCommand.add(bufferText.replaceAll(r'\"', '"'));
+      if (bufferText.trim().isNotEmpty) {
+        splittedCurlCommand.add(bufferText.replaceAll(r'\"', '"'));
+      }
       bufferText = '';
       continue;
     }
@@ -13,6 +15,10 @@ List<String> splitAsCommandLineArgs(String input) {
     // Do not count the quotes that has the `\` before them
     if (input[i] == '"' && (i == 0 || input[i - 1] != r'\')) {
       insideQuotes = !insideQuotes;
+      if (!insideQuotes) {
+        splittedCurlCommand.add(bufferText.replaceAll(r'\"', '"'));
+        bufferText = '';
+      }
       continue;
     }
 
@@ -20,6 +26,7 @@ List<String> splitAsCommandLineArgs(String input) {
     // Just add the buffer on last char
     if (i == input.length - 1) {
       splittedCurlCommand.add(bufferText.replaceAll(r'\"', '"'));
+      bufferText = '';
       break;
     }
   }

@@ -69,7 +69,7 @@ class Curl extends Equatable {
   /// ```
   static Curl? tryParse(String curlString) {
     try {
-      Curl.parse(curlString);
+      return Curl.parse(curlString);
     } catch (_) {}
     return null;
   }
@@ -78,11 +78,11 @@ class Curl extends Equatable {
   ///
   /// Example:
   /// ```dart
-  /// print(Curl.tryParse('curl -X GET https://www.example.com/')); // Curl(method: 'GET', url: 'https://www.example.com/')
-  /// print(Curl.tryParse('1f')); // [Exception] is thrown
+  /// print(Curl.parse('curl -X GET https://www.example.com/')); // Curl(method: 'GET', url: 'https://www.example.com/')
+  /// print(Curl.parse('1f')); // [Exception] is thrown
   /// ```
   static Curl parse(String curlString) {
-    final parser = ArgParser(allowTrailingOptions: false);
+    final parser = ArgParser(allowTrailingOptions: true);
 
     // Define the expected options
     parser.addOption('request', abbr: 'X');

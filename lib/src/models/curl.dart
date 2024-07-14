@@ -112,7 +112,6 @@ class Curl extends Equatable {
 
     final method = (result['request'] as String?)?.toUpperCase();
 
-    print("Headers: ${result['header']}");
     // Extract the request headers
     Map<String, String>? headers;
     if (result['header'] != null) {

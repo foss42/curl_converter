@@ -82,9 +82,14 @@ class Curl extends Equatable {
   /// print(Curl.parse('1f')); // [Exception] is thrown
   /// ```
   static Curl parse(String curlString) {
+    String? clean(String? url) {
+      return url?.replaceAll('"', '').replaceAll("'", '');
+    }
+
     final parser = ArgParser(allowTrailingOptions: true);
 
     // Define the expected options
+    parser.addOption('url');
     parser.addOption('request', abbr: 'X');
     parser.addMultiOption('header', abbr: 'H', splitCommas: false);
     parser.addOption('data', abbr: 'd');
@@ -92,6 +97,7 @@ class Curl extends Equatable {
     parser.addOption('user', abbr: 'u');
     parser.addOption('referer', abbr: 'e');
     parser.addOption('user-agent', abbr: 'A');
+    parser.addFlag('head', abbr: 'I');
     parser.addFlag('form', abbr: 'F');
     parser.addFlag('insecure', abbr: 'k');
     parser.addFlag('location', abbr: 'L');
@@ -106,6 +112,7 @@ class Curl extends Equatable {
 
     final method = (result['request'] as String?)?.toUpperCase();
 
+    print("Headers: ${result['header']}");
     // Extract the request headers
     Map<String, String>? headers;
     if (result['header'] != null) {
@@ -122,24 +129,26 @@ class Curl extends Equatable {
       }
     }
 
+    String? url = clean(result['url']);
     final String? data = result['data'];
     final String? cookie = result['cookie'];
     final String? user = result['user'];
     final String? referer = result['referer'];
     final String? userAgent = result['user-agent'];
     final bool form = result['form'] ?? false;
+    final bool head = result['head'] ?? false;
     final bool insecure = result['insecure'] ?? false;
     final bool location = result['location'] ?? false;
 
     // Extract the request URL
-    final url = result.rest.isNotEmpty ? result.rest.first.replaceAll('"', '') : null;
+    url ??= result.rest.isNotEmpty ? clean(result.rest.first) : null;
     if (url == null) {
       throw Exception('url is null');
     }
     final uri = Uri.parse(url);
 
     return Curl(
-      method: method ?? 'GET',
+      method: head ? "HEAD" : (method ?? 'GET'),
       uri: uri,
       headers: headers,
       data: data,

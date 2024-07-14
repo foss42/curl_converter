@@ -112,4 +112,145 @@ void main() {
       ),
     );
   }, timeout: defaultTimeout);
+
+  test('GET 1', () async {
+    expect(
+      Curl.parse(
+        r"""curl --url 'https://api.apidash.dev'""",
+      ),
+      Curl(
+        method: 'GET',
+        uri: Uri.parse('https://api.apidash.dev'),
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('GET 2', () async {
+    expect(
+      Curl.parse(
+        r"""curl --url 'https://api.apidash.dev/country/data?code=US'""",
+      ),
+      Curl(
+        method: 'GET',
+        uri: Uri.parse('https://api.apidash.dev/country/data?code=US'),
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('GET 3', () async {
+    expect(
+      Curl.parse(
+        r"""curl --url 'https://api.apidash.dev/country/data?code=IND'""",
+      ),
+      Curl(
+        method: 'GET',
+        uri: Uri.parse('https://api.apidash.dev/country/data?code=IND'),
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('GET 4', () async {
+    expect(
+      Curl.parse(
+        r"""curl --url 'https://api.apidash.dev/humanize/social?num=8700000&digits=3&system=SS&add_space=true&trailing_zeros=true'""",
+      ),
+      Curl(
+        method: 'GET',
+        uri: Uri.parse(
+            'https://api.apidash.dev/humanize/social?num=8700000&digits=3&system=SS&add_space=true&trailing_zeros=true'),
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('GET 5', () async {
+    expect(
+      Curl.parse(
+        r"""curl --url 'https://api.github.com/repos/foss42/apidash' \
+  --header 'User-Agent: Test Agent'""",
+      ),
+      Curl(
+        method: 'GET',
+        uri: Uri.parse('https://api.github.com/repos/foss42/apidash'),
+        headers: {"User-Agent": "Test Agent"},
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('GET 6', () async {
+    expect(
+      Curl.parse(
+        r"""curl --url 'https://api.github.com/repos/foss42/apidash?raw=true' \
+  --header 'User-Agent: Test Agent'""",
+      ),
+      Curl(
+        method: 'GET',
+        uri: Uri.parse('https://api.github.com/repos/foss42/apidash?raw=true'),
+        headers: {"User-Agent": "Test Agent"},
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('HEAD 2', () async {
+    expect(
+      Curl.parse(
+        r"""curl --head --url 'http://api.apidash.dev'""",
+      ),
+      Curl(
+        method: 'HEAD',
+        uri: Uri.parse('http://api.apidash.dev'),
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('POST 1', () async {
+    expect(
+      Curl.parse(
+        r"""curl --request POST \
+  --url 'https://api.apidash.dev/case/lower' \
+  --header 'Content-Type: text/plain' \
+  --data '{
+"text": "I LOVE Flutter"
+}'""",
+      ),
+      Curl(
+        method: 'POST',
+        uri: Uri.parse('https://api.apidash.dev/case/lower'),
+        headers: {"Content-Type": "text/plain"},
+        data: r"""{
+"text": "I LOVE Flutter"
+}""",
+      ),
+    );
+  }, timeout: defaultTimeout);
+
+  test('POST 2', () async {
+    expect(
+      Curl.parse(
+        r"""curl --request POST \
+  --url 'https://api.apidash.dev/case/lower' \
+  --header 'Content-Type: application/json' \
+  --data '{
+"text": "I LOVE Flutter",
+"flag": null,
+"male": true,
+"female": false,
+"no": 1.2,
+"arr": ["null", "true", "false", null]
+}'""",
+      ),
+      Curl(
+        method: 'POST',
+        uri: Uri.parse('https://api.apidash.dev/case/lower'),
+        headers: {"Content-Type": "application/json"},
+        data: r"""{
+"text": "I LOVE Flutter",
+"flag": null,
+"male": true,
+"female": false,
+"no": 1.2,
+"arr": ["null", "true", "false", null]
+}""",
+      ),
+    );
+  }, timeout: defaultTimeout);
 }

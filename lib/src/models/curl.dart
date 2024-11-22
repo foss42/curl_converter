@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:args/args.dart';
 import 'package:curl_converter/utils/string.dart';
 import 'package:equatable/equatable.dart';
@@ -60,7 +62,19 @@ class Curl extends Equatable {
     this.form = false,
     this.insecure = false,
     this.location = false,
-  });
+  }) {
+    assert(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'].contains(method));
+    assert(['http', 'https'].contains(uri.scheme));
+    assert(form == true ? formData != null : formData == null);
+    // This is to ensure that the form data is in the correct format
+    // We can remove this check if we decide to change the format of the form data
+    // to a Record<String, String> instead of List<List<String>>
+    if (formData != null) {
+      for (var element in formData!) {
+        assert(element.length == 2);
+      }
+    }
+  }
 
   /// Parses [curlString] into a [Curl] class instance.
   ///

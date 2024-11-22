@@ -27,7 +27,7 @@ void main() {
     );
   }, timeout: defaultTimeout);
 
-  test('should parse POST request with form-data', () {
+  test('parse POST request with form-data', () {
     const curl = '''
 curl -X POST https://example.com/upload \\
   -F "file=@/path/to/image.jpg" \\
@@ -48,6 +48,73 @@ curl -X POST https://example.com/upload \\
           ['username', 'john']
         ],
       ),
+    );
+  });
+
+  test('should throw exception when form data is not in key=value format', () {
+    const curl = '''
+curl -X POST https://example.com/upload \\
+  -F "invalid_format" \\
+  -F "username=john"
+    ''';
+    expect(
+      () => Curl.parse(curl),
+      throwsException,
+    );
+  });
+
+  test('should throw assertion error when any form data entry is not a key-value pair', () {
+    expect(
+      () => Curl(
+        uri: Uri.parse('https://example.com/upload'),
+        method: 'POST',
+        form: true,
+        formData: [
+          ['key', 'value', 'extra'], // Invalid: length > 2
+          ['username', 'john']
+        ],
+      ),
+      throwsA(isA<AssertionError>()),
+    );
+
+    expect(
+      () => Curl(
+        uri: Uri.parse('https://example.com/upload'),
+        method: 'POST',
+        form: true,
+        formData: [
+          ['just_key'], // Invalid: length < 2
+          ['username', 'john']
+        ],
+      ),
+      throwsA(isA<AssertionError>()),
+    );
+  });
+
+  test('should not throw when form data entries are valid key-value pairs', () {
+    expect(
+      () => Curl(
+        uri: Uri.parse('https://example.com/upload'),
+        method: 'POST',
+        form: true,
+        formData: [
+          ['key', 'value'],
+          ['username', 'john']
+        ],
+      ),
+      returnsNormally,
+    );
+  });
+
+  test('should not throw when form data is null', () {
+    expect(
+      () => Curl(
+        uri: Uri.parse('https://example.com/upload'),
+        method: 'POST',
+        form: false,
+        formData: null,
+      ),
+      returnsNormally,
     );
   });
 

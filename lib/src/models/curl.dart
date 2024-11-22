@@ -71,7 +71,7 @@ class Curl extends Equatable {
     // to a Record<String, String> instead of List<List<String>>
     if (formData != null) {
       for (var element in formData!) {
-        assert(element.length == 2);
+        assert(element.length == 2, 'Form data is not in key=value format');
       }
     }
   }

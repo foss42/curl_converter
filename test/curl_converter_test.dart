@@ -27,6 +27,30 @@ void main() {
     );
   }, timeout: defaultTimeout);
 
+  test('should parse POST request with form-data', () {
+    const curl = '''
+curl -X POST https://example.com/upload \\
+  -F "file=@/path/to/image.jpg" \\
+  -F "username=john"
+      ''';
+
+    expect(
+      Curl.parse(curl),
+      Curl(
+        method: 'POST',
+        uri: Uri.parse('https://example.com/upload'),
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        form: true,
+        formData: [
+          ['file', '/path/to/image.jpg'],
+          ['username', 'john']
+        ],
+      ),
+    );
+  });
+
   test('Check quotes support for URL string', () async {
     expect(
       Curl.parse('curl -X GET "https://www.example.com/"'),

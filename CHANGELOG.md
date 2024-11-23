@@ -1,3 +1,7 @@
+## 1.0.5
+
+- Revamped original code and added better parsing support
+
 ## 1.0.4
 
 - Fix the Curl.tryParse method

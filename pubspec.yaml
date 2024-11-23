@@ -1,7 +1,7 @@
 name: curl_converter
 description: A Dart package for effortless conversion between cURL commands and Dart class.
-version: 1.0.4
-repository: https://github.com/utopicnarwhal/curl_converter
+version: 1.0.5
+repository: https://github.com/foss42/curl_converter
 
 environment:
   sdk: ">=2.17.0 <4.0.0"

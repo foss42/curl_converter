@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:curl_converter/src/models/curl.dart';
+import 'package:curl_converter/src/models/form_data_model.dart';
 import 'package:test/test.dart';
 
 const defaultTimeout = Timeout(Duration(seconds: 3));
@@ -28,10 +29,9 @@ void main() {
   }, timeout: defaultTimeout);
 
   test('parse POST request with form-data', () {
-    const curl = '''
-curl -X POST https://example.com/upload \\
-  -F "file=@/path/to/image.jpg" \\
-  -F "username=john"
+    const curl = r'''curl -X POST https://example.com/upload \\
+      -F "file=@/path/to/image.jpg" \\
+      -F "username=john"
       ''';
 
     expect(
@@ -44,50 +44,48 @@ curl -X POST https://example.com/upload \\
         },
         form: true,
         formData: [
-          ['file', '/path/to/image.jpg'],
-          ['username', 'john']
+          FormDataModel(name: "file", value: "/path/to/image.jpg", type: FormDataType.file),
+          FormDataModel(name: "username", value: "john", type: FormDataType.text)
+        ],
+      ),
+    );
+  });
+
+  test('parse POST request with form-data including a file and arrays', () {
+    const curl = r'''curl -X POST https://example.com/upload \\
+        -F "file=@/path/to/image.jpg" \\
+        -F "username=john" \\
+        -F "tags=tag1" \\
+        -F "tags=tag2"
+      ''';
+
+    expect(
+      Curl.parse(curl),
+      Curl(
+        method: 'POST',
+        uri: Uri.parse('https://example.com/upload'),
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        form: true,
+        formData: [
+          FormDataModel(name: "file", value: "/path/to/image.jpg", type: FormDataType.file),
+          FormDataModel(name: "username", value: "john", type: FormDataType.text),
+          FormDataModel(name: "tags", value: "tag1", type: FormDataType.text),
+          FormDataModel(name: "tags", value: "tag2", type: FormDataType.text),
         ],
       ),
     );
   });
 
   test('should throw exception when form data is not in key=value format', () {
-    const curl = '''
-curl -X POST https://example.com/upload \\
+    const curl = r'''curl -X POST https://example.com/upload \\
   -F "invalid_format" \\
   -F "username=john"
-    ''';
+  ''';
     expect(
       () => Curl.parse(curl),
       throwsException,
-    );
-  });
-
-  test('should throw assertion error when any form data entry is not a key-value pair', () {
-    expect(
-      () => Curl(
-        uri: Uri.parse('https://example.com/upload'),
-        method: 'POST',
-        form: true,
-        formData: [
-          ['key', 'value', 'extra'], // Invalid: length > 2
-          ['username', 'john']
-        ],
-      ),
-      throwsA(isA<AssertionError>()),
-    );
-
-    expect(
-      () => Curl(
-        uri: Uri.parse('https://example.com/upload'),
-        method: 'POST',
-        form: true,
-        formData: [
-          ['just_key'], // Invalid: length < 2
-          ['username', 'john']
-        ],
-      ),
-      throwsA(isA<AssertionError>()),
     );
   });
 
@@ -98,8 +96,8 @@ curl -X POST https://example.com/upload \\
         method: 'POST',
         form: true,
         formData: [
-          ['key', 'value'],
-          ['username', 'john']
+          FormDataModel(name: "username", value: "john", type: FormDataType.text),
+          FormDataModel(name: "password", value: "password", type: FormDataType.text),
         ],
       ),
       returnsNormally,

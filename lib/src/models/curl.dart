@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:args/args.dart';
+import 'package:curl_converter/src/models/form_data_model.dart';
 import 'package:curl_converter/utils/string.dart';
 import 'package:equatable/equatable.dart';
 
@@ -38,7 +37,7 @@ class Curl extends Equatable {
 
   /// Form data list.
   /// Currently, it is represented as a list of key-value pairs ([key, value]).
-  final List<List<String>>? formData;
+  final List<FormDataModel>? formData;
 
   /// Allows insecure SSL connections.
   final bool insecure;
@@ -66,14 +65,6 @@ class Curl extends Equatable {
     assert(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'].contains(method));
     assert(['http', 'https'].contains(uri.scheme));
     assert(form == true ? formData != null : formData == null);
-    // This is to ensure that the form data is in the correct format
-    // We can remove this check if we decide to change the format of the form data
-    // to a Record<String, String> instead of List<List<String>>
-    if (formData != null) {
-      for (var element in formData!) {
-        assert(element.length == 2, 'Form data is not in key=value format');
-      }
-    }
   }
 
   /// Parses [curlString] into a [Curl] class instance.
@@ -132,7 +123,15 @@ class Curl extends Equatable {
 
     final result = parser.parse(splittedCurlString);
 
-    final method = (result['request'] as String?)?.toUpperCase();
+    // A potential alternative to the above code
+    // final curlString = curlString.replaceAll("\\\n", " ");
+    // final tokens = shlex.split(curlString);
+    // final result = parser.parse(tokens);
+    // if (!result.arguments.contains('curl')) {
+    //   throw Exception('Invalid cURL command');
+    // }
+
+    String? method = (result['request'] as String?)?.toUpperCase();
 
     // Extract the request headers
     Map<String, String>? headers;
@@ -151,21 +150,29 @@ class Curl extends Equatable {
     }
 
     // Parse form data
-    List<List<String>>? formData;
+    List<FormDataModel>? formData;
     if (result['form'] is List<String> && (result['form'] as List<String>).isNotEmpty) {
-      formData = [];
+      formData = <FormDataModel>[];
       for (final formEntry in result['form']) {
         final pairs = formEntry.split('=');
         if (pairs.length != 2) {
           throw Exception('Form data is not in key=value format');
         }
 
-        // File type form data
-        if (pairs[1].startsWith('@')) {
-          pairs[1] = pairs[1].substring(1);
-        }
+        // Handling the file or text type
+        FormDataModel formDataModel = pairs[1].startsWith('@')
+            ? FormDataModel(
+                name: pairs[0],
+                value: pairs[1].substring(1),
+                type: FormDataType.file,
+              )
+            : FormDataModel(
+                name: pairs[0],
+                value: pairs[1],
+                type: FormDataType.text,
+              );
 
-        formData.add([pairs[0], pairs[1]]);
+        formData.add(formDataModel);
       }
       headers ??= <String, String>{};
       headers['Content-Type'] = 'multipart/form-data';
@@ -178,19 +185,29 @@ class Curl extends Equatable {
     }
     final uri = Uri.parse(url);
 
+    method = result['head'] == true ? 'HEAD' : (method ?? 'GET');
+    final String? data = result['data'];
+    final String? cookie = result['cookie'];
+    final String? user = result['user'];
+    final String? referer = result['referer'];
+    final String? userAgent = result['user-agent'];
+    final bool form = formData != null && formData.isNotEmpty;
+    final bool insecure = result['insecure'] ?? false;
+    final bool location = result['location'] ?? false;
+
     return Curl(
-      method: result['head'] == true ? "HEAD" : (method ?? 'GET'),
+      method: method,
       uri: uri,
       headers: headers,
-      data: result['data'],
-      cookie: result['cookie'],
-      user: result['user'],
-      referer: result['referer'],
-      userAgent: result['user-agent'],
-      form: formData != null && formData.isNotEmpty,
+      data: data,
+      cookie: cookie,
+      user: user,
+      referer: referer,
+      userAgent: userAgent,
+      form: form,
       formData: formData,
-      insecure: result['insecure'] ?? false,
-      location: result['location'] ?? false,
+      insecure: insecure,
+      location: location,
     );
   }
 
@@ -232,7 +249,7 @@ class Curl extends Equatable {
     if (form) {
       for (final formEntry in formData!) {
         cmd += '-F ';
-        cmd += '"${formEntry[0]}=${formEntry[1]}" ';
+        cmd += '"${formEntry.name}=${formEntry.value}" ';
       }
     }
     // Add the insecure flag
